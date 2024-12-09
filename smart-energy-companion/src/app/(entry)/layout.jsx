@@ -52,13 +52,10 @@ function EntryLayout({ children }) {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url(${backgroundImage})`, // Dynamic background
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover', // Adjusted background size based on screen size
           backgroundPosition : 'center', // Adjusted position based on screen size
           backgroundAttachment: ultraWide ? 'fixed' : 'scroll', // Parallax effect on ultra-wide screens
-          opacity: 0.9, // Lower opacity for blur effect
-          zIndex: -1,
           transition: 'background-image 0.5s ease-in-out', // Smooth background transition
         }}
       />
@@ -69,10 +66,7 @@ function EntryLayout({ children }) {
           minHeight: "100vh", // Ensure the content area fills the viewport
           display: "flex",
           flexDirection: "column",
-          fontFamily: theme.typography.fontFamily,
-          backgroundColor: "rgba(0, 0, 0, 0.5)", // A semi-transparent overlay to improve text contrast
-          padding: "0 5px", // Add padding to give breathing space to the content
-          zIndex: 1,
+          padding: 0,
         }}
       >
         {/* Navigation Bar */}
