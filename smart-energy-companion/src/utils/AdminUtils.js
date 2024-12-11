@@ -1,5 +1,5 @@
 import {axiosPrivate, axiosPublic} from "@/utils/AxiosInstance";
-import {healthWorkerDataStore, stakeholderDataStore, userDataStore} from "@/store/profileDataStore"
+import {userDataStore} from "@/store/profileDataStore"
 import nacl from "tweetnacl";
 import {decodeBase64, decodeUTF8, encodeBase64} from "tweetnacl-util";
 
@@ -76,7 +76,7 @@ class AdminUtils {
             if (response.status === 201) {
                 return response.data;
             } else {
-                throw new Error(response.error);
+                return new Error(response.error);
             }
         } catch (error) {
             console.log({error});
@@ -113,7 +113,7 @@ class AdminUtils {
             if (response.status === 201) {
                 return response.data.data;
             } else {
-                throw new Error(response.error);
+                return new Error(response.error);
             }
         } catch (error) {
             console.log({error});
@@ -131,7 +131,7 @@ class AdminUtils {
             if (response.status === 201) {
                 return response.data.data;
             } else {
-                throw new Error(response.error);
+                return new Error(response.error);
             }
         } catch (error) {
             console.log({error});
@@ -148,7 +148,7 @@ class AdminUtils {
             if (response.status === 200) {
                 return response.data;
             } else {
-                throw new Error(response.error);
+                return new Error(response.error);
             }
         } catch (error) {
             console.log({error});
@@ -165,7 +165,7 @@ class AdminUtils {
             if (response.status === 200) {
                 return response.data;
             } else {
-                throw new Error(response.error);
+                return new Error(response.error);
             }
         } catch (error) {
             console.log({error});
@@ -183,7 +183,7 @@ class AdminUtils {
             if (response.status === 201) {
                 return response.data;
             } else {
-                throw new Error(response.error);
+                return new Error(response.error);
             }
         } catch (error) {
             console.log({error});
@@ -210,294 +210,13 @@ class AdminUtils {
                 return response.data;
             } else {
                 console.error('Upload response:', response);
-                throw new Error(response.data?.error || 'Upload failed');
+                return new Error(response.data?.error || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload error:', error);
             throw error;
         }
     }
-
-    static async setUserLocation(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "PATCH",
-                url: '/user/profile/location/set',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async deleteUserLocation(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "DELETE",
-                url: '/user/profile/location/delete',
-                data: obj,
-            });
-            if (response.status === 200) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async editUserLocation(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "PATCH",
-                url: '/user/profile/location/edit',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    // Medical History
-    static async createMedicalHistoryRecord(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "POST",
-                url: '/user/medical-history/create',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data;
-            } else {
-                return new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async getMedicalHistoryRecord() {
-        try {
-            const response = await axiosPrivate({
-                method: "GET",
-                url: '/user/medical-history/get',
-            });
-            if (response.status === 200) {
-                return response.data.data;
-            } else {
-                return new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async updateMedicalHistoryRecord(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "PATCH",
-                url: '/user/medical-history/update',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data.data;
-            } else {
-                return new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-
-    // health worker section
-
-    static async healthWorkerRegistration(obj) {
-        try {
-            const response = await axiosPublic({
-                method: "POST",
-                url: '/health-worker/register',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data.data;
-            } else {
-                throw new Error(response?.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async healthWorkerLogin(obj) {
-        try {
-            const response = await axiosPublic({
-                method: "POST",
-                url: '/health-worker/login',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async healthWorkerLogout() {
-        try {
-            const response = await axiosPrivate({
-                method: "POST",
-                url: '/health-worker/logout',
-            });
-            if (response.status === 200) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async healthWorkerProfile() {
-        try {
-            const response = await axiosPrivate({
-                method: "GET",
-                url: '/health-worker/profile',
-            });
-            if (response.status === 200) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async updateHealthWorkerProfile(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "PATCH",
-                url: '/health-worker/profile/update',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async healthWorkerAvatar(formData) {
-        try {
-            const response = await axiosPrivate({
-                method: "PATCH",
-                url: '/health-worker/profile/avatar',
-                data: formData,
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                // Add this to properly handle the FormData
-                transformRequest: [function (data) {
-                    return data;
-                }],
-            });
-
-            if (response.status === 201) {
-                return response.data;
-            } else {
-                console.error('Upload response:', response);
-                throw new Error(response.data?.error || 'Upload failed');
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-            throw error;
-        }
-    }
-
-    static async setHealthWorkerLocation(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "PATCH",
-                url: '/health-worker/profile/location/set',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async deleteHealthWorkerLocation(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "DELETE",
-                url: '/health-worker/profile/location/delete',
-                data: obj,
-            });
-            if (response.status === 200) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
-    static async editHealthWorkerLocation(obj) {
-        try {
-            const response = await axiosPrivate({
-                method: "PATCH",
-                url: '/health-worker/profile/location/edit',
-                data: obj,
-            });
-            if (response.status === 201) {
-                return response.data;
-            } else {
-                throw new Error(response.error);
-            }
-        } catch (error) {
-            console.log({error});
-            throw new Error(error);
-        }
-    }
-
 
 }
 

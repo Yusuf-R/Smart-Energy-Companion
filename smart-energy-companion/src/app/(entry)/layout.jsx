@@ -30,7 +30,7 @@ function EntryLayout({ children }) {
   const xxLarge = useMediaQuery(theme.breakpoints.down("xxl"));
   const ultraWide = useMediaQuery(theme.breakpoints.down("xxxxl"));
 
-  const [backgroundImage, setBackgroundImage] = useState('/bg-1.jpg'); // Default background
+  const [backgroundImage, setBackgroundImage] = useState('/loading.png'); // Default background
 
   // Update the background based on the current route
   useEffect(() => {
@@ -73,7 +73,7 @@ function EntryLayout({ children }) {
         <Nav />
 
         {/* Main content area */}
-        <Box sx={{ mt: 10, p: 0, flex: 1 }}>
+        <Box sx={{ mt: 0, p: 0, flex: 1 }}>
           {children}
         </Box>
        

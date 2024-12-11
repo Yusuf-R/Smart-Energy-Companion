@@ -12,14 +12,26 @@ const UnderConstruction = () => {
     const router = useRouter();
 
     return (
-        <Container maxWidth="md" sx={{ textAlign: 'center', py: 6 }}>
+        <Container maxWidth="xxl" sx={{
+            textAlign: 'center',
+            p: 0,
+            m: 0,
+            background: 'url(/bg-3.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            minHeight: '100vh',
+            color: '#FFF',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }}>
             <Stack spacing={4} alignItems="center">
                 <ConstructionIcon sx={{ fontSize: 80, color: '#FF9800' }} />
                 <Typography variant="h4" sx={{ fontWeight: 700, color: 'gold' }}>
                     🚧 Page Under Construction 🚧
                 </Typography>
                 <Typography variant="body1" sx={{ color: '#FFF' }}>
-                    We&apos;re working hard to bring this feature to life. Please check back soon!
+                    Please check back soon!
                 </Typography>
                 <Button
                     variant="contained"

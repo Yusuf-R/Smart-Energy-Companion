@@ -11,7 +11,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TouchAppIcon from '@mui/icons-material/TouchApp';
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 const featureContent = [
   {
@@ -166,7 +166,6 @@ const FeatureMarquee = () => {
       right: '50%',
       marginLeft: '-50vw',
       marginRight: '-50vw',
-      // background: 'linear-gradient(180deg, rgba(33, 150, 243, 0.05) 0%, rgba(76, 175, 80, 0.05) 100%)',
       position: 'relative',
       '&::before': {
         content: '""',
@@ -175,7 +174,6 @@ const FeatureMarquee = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        // background: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%)',
         opacity: 0.6,
         zIndex: 0,
       },

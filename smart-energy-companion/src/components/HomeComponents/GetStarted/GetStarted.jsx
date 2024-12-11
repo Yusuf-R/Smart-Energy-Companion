@@ -10,9 +10,7 @@ import { motion } from 'framer-motion';
 
 // Background images for each category
 const backgroundImages = {
-  user: 'url("/pic6.svg")',
-  healthWorker: 'url("/pic3.svg")',
-  stakeholder: 'url("/pic6.png")',
+  user: 'url("/bg-6.jpg")',
 };
 
 // Subtle floating animation
@@ -48,13 +46,6 @@ function GetStarted() {
       backgroundImage: backgroundImages.user,
       route: '/authorization/user',
       role: 'user',
-    },
-    {
-      title: 'Health Worker',
-      description: 'Access community health data, provide mentorship, and assist in health monitoring.',
-      backgroundImage: backgroundImages.healthWorker,
-      route: '/authorization/health-worker',
-      role: 'healthWorker',
     },
   ];
 

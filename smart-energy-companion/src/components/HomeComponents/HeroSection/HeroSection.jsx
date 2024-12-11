@@ -100,7 +100,7 @@ export default function HeroSection() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => router.push('/signup')}
+                  onClick={() => router.push('/get-started')}
                   sx={{
                     background: 'linear-gradient(90deg, #2196F3, #4CAF50)',
                     '&:hover': {
@@ -113,7 +113,7 @@ export default function HeroSection() {
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => router.push('/learn-more')}
+                  onClick={() => router.push('/explore')}
                   sx={{
                     borderColor: '#2196F3',
                     color: '#2196F3',
