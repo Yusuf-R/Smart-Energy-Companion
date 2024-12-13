@@ -1,54 +1,56 @@
 import mongoose from 'mongoose';
 
+
 class MongoDBClient {
     constructor() {
-        this.isConnected = false;
+        this.connection = {};
     }
 
     // Initialize MongoDB connection
     async connect() {
-        if (this.isConnected) {
-            console.log("💡 Already connected to MongoDB 😁");
+        // Check if already connected
+        if (this.connection.isConnected) {
+            console.log("💡 Already connected to MongoDB 😁 ");
             return;
         }
 
-        const uri = process.env.MONGODB_URI;
-        if (!uri) {
-            console.error("👺 Error: Invalid/Missing environment variable MONGODB_URI 🚨");
-            throw new Error("Invalid/Missing environment variable MONGODB_URI");
+        // Check if MONGODB_URI is available
+        if (!process.env.MONGODB_URI) {
+            console.log("👺 Error: Invalid/Missing environment variable MONGODB_URI 🚨");
+            return;
         }
 
+        // Attempt to connect
         try {
-            const db = await mongoose.connect(uri);
-            this.isConnected = db.connections[0].readyState === 1;
+            const db = await mongoose.connect(process.env.MONGODB_URI);
+            // Track connection state
+            this.connection.isConnected = db.connections[0].readyState;
 
-            if (this.isConnected) {
-                console.log("🚀 Successfully connected to MongoDB 🤩");
+            if (this.connection.isConnected === 1) {
+                console.log("🚀 Successfully connected to MongoDB 🤩 ");
             } else {
-                console.error("👺 Failed to connect to MongoDB 🚨");
-                throw new Error("Failed to connect to MongoDB");
+                console.log("👺 Failed to connect to MongoDB 🚨 ");
             }
         } catch (error) {
-            console.error("👺 Error connecting to MongoDB: 🚨", error.message);
-            throw error;
+            console.log("👺 Error connecting to MongoDB: 🚨", error.message);
         }
     }
 
     // Check if the connection is alive
-    isAlive() {
-        return this.isConnected;
+    async isAlive() {
+        return await this.connection.isConnected === 1;
     }
 
     // Close the MongoDB connection
     async close() {
-        if (this.isConnected) {
+        if (this.connection.isConnected) {
             await mongoose.disconnect();
             console.log("🔌 MongoDB connection closed");
-            this.isConnected = false;
+            this.connection.isConnected = false;
         }
     }
 }
 
-// Export the MongoDBClient instance
+// Create an instance of the class
 const dbClient = new MongoDBClient();
 export default dbClient;

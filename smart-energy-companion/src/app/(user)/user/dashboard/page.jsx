@@ -1,85 +1,54 @@
 'use client';
 import { lazy, useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import AdminUtils from "@/utils/AdminUtils";
-import { userDataStore} from "@/store/profileDataStore";
 import LazyLoading from "@/components/LazyLoading/LazyLoading";
 import { toast } from 'sonner';
 
-const Dashboard = lazy(() => import("@/components/UserComponents/DahsboardComponents/Dashboard/Dashboard"));
+const Dashboard = lazy(() => import("@/components/UserComponents/DashboardComponents/Dashboard/Dashboard"));
 
-function UserHMSDashboard() {
-    const [decryptedProfile, setDecryptedProfile] = useState(null);
-    const { encryptedUserData, setEncryptedUserData } = userDataStore();
-    const queryClient = useQueryClient();
+function UserDashboard() {
     const router = useRouter();
+    const queryClient = useQueryClient();
 
-    // Step 1: Check for the cached original client profile in TanStack
-    const userProfile = queryClient.getQueryData(["UserData"]);
+    // Retrieve cached userProfile if available
+    const {userProfile} = queryClient.getQueryData(["UserData"]) || {};
+
+    // Fetch the user profile if not in the cache
+    const {data, isLoading, isError} = useQuery({
+        queryKey: ["UserData"],
+        queryFn: AdminUtils.userProfile,
+        staleTime: Infinity,
+        enabled: !userProfile,
+    });
+
+    const effectiveUserData = userProfile || data;
 
     useEffect(() => {
-        async function fetchAndProcessData() {
-            if (userProfile) {
-                // Case 1: If original profile data is found in TanStack, use it directly
-                handleLocationCheck(userProfile);
-            } else if (encryptedUserData) {
-                // Case 2: If not in TanStack, but encrypted data exists in Zustand, decrypt it
-                try {
-                    const decryptedData = await AdminUtils.dataDecryption(encryptedUserData);
-                    queryClient.setQueryData(["UserData"], decryptedData); // Cache decrypted data in TanStack
-                    handleLocationCheck(decryptedData);
-                } catch (error) {
-                    console.error("Decryption error:", error);
-                    router.push('/error/e401'); // Navigate to error page
-                }
-            } else {
-                // Case 3: If neither TanStack nor Zustand has data, fetch from backend
-                try {
-                    const response = await AdminUtils.userProfile();
-                    const { userProfile: fetchedProfile } = response;
+        if (effectiveUserData) {
+            // Check if the user profile is complete
+            const isProfileComplete = effectiveUserData.firstName && effectiveUserData.lastName;
 
-                    // encrypt data and store in Zustand
-                    const newEncryptedData = await AdminUtils.encryptData(fetchedProfile);
-
-                    // Cache both original and encrypted data
-                    queryClient.setQueryData(["UserData"], fetchedProfile);
-                    setEncryptedUserData(newEncryptedData);
-
-                    handleLocationCheck(fetchedProfile);
-                } catch (error) {
-                    console.error("Fetching error:", error);
-                    router.push('/error/e404'); // Navigate to error page
-                }
-            }
-        }
-
-        function handleLocationCheck(profile) {
-            // Step 4: Check if the profile has saved locations and has an address
-            const impCheck = profile.geoLocation && profile.geoLocation.length > 0 && profile.address;
-            if (!impCheck) {
-                // Redirect to Location Setup Page if no locations are found
+            if (!isProfileComplete) {
                 toast.info('Redirecting to finish up profile settings...');
-                toast.info('Please set up your locations to continue.');
                 router.push("/user/get-started");
-            } else {
-                setDecryptedProfile(profile); // Set decrypted profile to load RideBookingMap
             }
+        } else if (!isLoading && isError) {
+            // If fetching fails or user data is unavailable, redirect to an error page
+            router.push("/error/e401");
         }
+    }, [effectiveUserData, isLoading, isError, router]);
 
-        fetchAndProcessData();
-    }, [userProfile, encryptedUserData, queryClient, setEncryptedUserData, router]);
-
-    // Show loading state while data is processed or redirecting
-    if (!decryptedProfile) {
+    if (isLoading || !effectiveUserData) {
         return <LazyLoading />;
     }
 
     return (
         <Suspense fallback={<LazyLoading />}>
-            <Dashboard userProfile={decryptedProfile} />
+            <Dashboard userProfile={effectiveUserData} />
         </Suspense>
     );
 }
 
-export default UserHMSDashboard;
+export default UserDashboard;

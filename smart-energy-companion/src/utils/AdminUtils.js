@@ -7,7 +7,6 @@ const publicKeyBase64 = process.env.NEXT_PUBLIC_TWEETNACL_PUBLIC_KEY;
 
 class AdminUtils {
 
-    // to be used for Registration. Login and SetPassword Specific operations
     static async encryptCredentials(data) {
         const publicKeyPem = process.env.NEXT_PUBLIC_ENCRYPTION_PUBLIC_KEY;
 
@@ -50,22 +49,6 @@ class AdminUtils {
         }
     }
 
-    // Encrypt data using the PEM public key stored as an environment variable
-    static async encryptDataWithTweetNaCl(data) {
-        const publicKey = decodeBase64(publicKeyBase64);
-        const messageUint8 = decodeUTF8(JSON.stringify(data));
-
-        // Generate a nonce for encryption
-        const nonce = nacl.randomBytes(nacl.box.nonceLength);
-        const encryptedMessage = nacl.box(messageUint8, nonce, publicKey, nacl.box.keyPair().secretKey);
-
-        return {
-            encryptedMessage: encodeBase64(encryptedMessage),
-            nonce: encodeBase64(nonce),
-        };
-
-    }
-
     static async dataDecryption(obj) {
         try {
             const response = await axiosPublic({
@@ -84,22 +67,32 @@ class AdminUtils {
         }
     }
 
+
+
+    // Encrypt data using the PEM public key stored as an environment variable
+    static async encryptDataWithTweetNaCl(data) {
+        const publicKey = decodeBase64(publicKeyBase64);
+        const messageUint8 = decodeUTF8(JSON.stringify(data));
+
+        // Generate a nonce for encryption
+        const nonce = nacl.randomBytes(nacl.box.nonceLength);
+        const encryptedMessage = nacl.box(messageUint8, nonce, publicKey, nacl.box.keyPair().secretKey);
+
+        return {
+            encryptedMessage: encodeBase64(encryptedMessage),
+            nonce: encodeBase64(nonce),
+        };
+
+    }
+
     static async encryptAndStoreProfile(profileData) {
         try {
             const encryptedData = await AdminUtils.encryptDataWithTweetNaCl(profileData, publicKeyBase64);
-            if (profileData.role === 'User') {
-                userDataStore.getState().setEncryptedUserData(encryptedData);
-            } else if (profileData.role === 'HealthWorker') {
-                healthWorkerDataStore.getState().setEncryptedHealthWorkerData(encryptedData);
-            } else if (profileData.role === 'StakeHolder') {
-                stakeholderDataStore.getState().setEncryptedStakeHolderData(encryptedData);
-            }
-            return;
+            userDataStore.getState().setEncryptedUserData(encryptedData);
         } catch (error) {
             console.error("Failed to encrypt and store data with TweetNaCl:", error);
         }
     }
-
 
     // Api for User Objects
 

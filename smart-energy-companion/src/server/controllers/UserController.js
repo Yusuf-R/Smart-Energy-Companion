@@ -1,13 +1,12 @@
 import AuthController from "@/server/controllers/AuthController";
 import dbClient from "@/server/db/mongoDb";
-import getCareBaseModels from "@/server/models/CareBase/CareBase";
+import getEnergyCompanionModels from "@/server/models/EnergyCompanion/EnergyCompanion";
 import {loginValidator, signUpValidator} from "@/validators/userValidators";
 import {beProfileUpdateValidator} from "@/validators/beProfileUpdateValidator";
 import mongoose from "mongoose";
-import {setLocationValidator} from "@/validators/locationValidator";
 
 const {ObjectId} = mongoose.Types;
-const {User} = await getCareBaseModels();
+const {User} = await getEnergyCompanionModels();
 
 class UserController {
 
@@ -56,18 +55,23 @@ class UserController {
 
             // Validate the user input
             const {success, data} = loginValidator.safeParse(decryptedData);
-            if (!success) throw new Error("Login-Validation failed");
+            if (!success) {
+              return new Error("Login-Validation failed");
+            }
 
             const {email, password} = data;
 
             // Find the user by email
             const user = await User.findOne({email}).select("+password");
-            if (!user) throw new Error("User not found");
+            if (!user) {
+                return new Error("User not found");
+            }
 
             // Check if the password is correct
             const isPasswordValid = await AuthController.comparePassword(password, user.password);
-            if (!isPasswordValid) throw new Error("Invalid credentials");
-
+            if (!isPasswordValid) {
+                return new Error("Invalid credentials");
+            }
             // set the user status to online
             user.status = "online";
             await user.save();
@@ -88,7 +92,7 @@ class UserController {
             // Fetch the user profile from the database
             const userProfile = await User.findById(mongoose.Types.ObjectId.createFromHexString(userId));
             if (!userProfile) {
-                throw new Error("User not found");
+                return new Error("User not found");
             }
             // set the user profile status to offline
             userProfile.status = "offline";
@@ -102,19 +106,18 @@ class UserController {
         }
     }
 
-
     static async Profile(userId) {
         try {
             await dbClient.connect();
 
             // Check if userId is a valid ObjectId
             if (!ObjectId.isValid(userId)) {
-              throw new Error("Invalid user ID format");
+              return new Error("Invalid user ID format");
             }
 
             const userProfile = await User.findById(userId);
             if (!userProfile) {
-              throw new Error("User profile not found");
+              return new Error("User profile not found");
             }
             // set the user profile status to online
             userProfile.status = "online";
@@ -122,7 +125,7 @@ class UserController {
             return userProfile;
         } catch (error) {
             console.error("Error in Profile:", error.message);
-            throw new Error('User profile retrieval failed');
+            return new Error('User profile retrieval failed');
         } finally {
             // disconnect db
             await dbClient.close();
@@ -174,121 +177,6 @@ class UserController {
         }
     }
 
-    static async AddLocation(userId, obj) {
-        try {
-            // Fetch the user profile from the database
-            await dbClient.connect();
-            const userProfile = await User.findById(mongoose.Types.ObjectId.createFromHexString(userId));
-            if (!userProfile) {
-                return new Error("User not found");
-            }
-            // validate the location data
-            const {success, data} = setLocationValidator.safeParse(obj);
-            if (!success) {
-                return new Error("Location validation failed");
-            }
-            console.log({data});
-            const newAddress = {
-                category: data.category,
-                latitude: data.locationCoords.latitude,
-                longitude: data.locationCoords.longitude,
-                locationName: data.locationName,
-                description: data.description || "",
-            };
-            userProfile.geoLocation.push(newAddress);
-            await userProfile.save();
-            return userProfile;
-
-        } catch (error) {
-            console.error("Error in SetLocation:", error.message);
-            throw new Error('Set location failed');
-        } finally {
-            // disconnect db
-            await dbClient.close();
-        }
-    }
-
-    static async DeleteLocation(userId, addressId) {
-        try {
-            // Connect to the database
-            await dbClient.connect();
-
-            // Convert userId and addressId to ObjectId if they are strings
-            // Fetch the user profile using the userId
-            const userProfile = await User.findById(mongoose.Types.ObjectId.createFromHexString(userId));
-            if (!userProfile) {
-                throw new Error("User not found");
-            }
-
-            // Find the index of the address with the matching _id
-            const geoIndex = userProfile.geoLocation.findIndex(
-                (address) => address._id.equals(mongoose.Types.ObjectId.createFromHexString(addressId))  // Use `equals` to compare ObjectIds
-            );
-
-            if (geoIndex === -1) {
-                throw new Error("Address not found");
-            }
-
-            // Remove the address from the geoLocation array
-            userProfile.geoLocation.splice(geoIndex, 1);
-
-            // Save the updated profile
-            await userProfile.save();
-
-            // Close the database connection
-            await dbClient.close();
-
-            return userProfile;
-        } catch (error) {
-            console.error("Error in DeleteLocation:", error.message);
-            throw new Error("Delete location failed");
-        }
-    }
-
-    static async EditLocation(userId, obj) {
-        try {
-            // Connect to the database
-            await dbClient.connect();
-            console.log({obj});
-
-            // Convert userId and addressId to ObjectId if they are strings
-            // Fetch the user profile using the userId
-            const userProfile = await User.findById(mongoose.Types.ObjectId.createFromHexString(userId));
-            if (!userProfile) {
-                throw new Error("User not found");
-            }
-
-            console.log({obj});
-
-            // Find the index of the address with the matching _id
-            const geoIndex = userProfile.geoLocation.findIndex(
-                (address) => address._id.equals(mongoose.Types.ObjectId.createFromHexString(obj._id))  // Use `equals` to compare ObjectIds
-            );
-
-            if (geoIndex === -1) {
-                throw new Error("Address not found");
-            }
-
-            // Update the address fields
-            userProfile.geoLocation[geoIndex].category = obj.category;
-            userProfile.geoLocation[geoIndex].latitude = obj.locationCoords.latitude;
-            userProfile.geoLocation[geoIndex].longitude = obj.locationCoords.longitude;
-            userProfile.geoLocation[geoIndex].locationName = obj.locationName || "";
-            userProfile.geoLocation[geoIndex].description = obj.description || "";
-
-            // Save the updated profile
-            await userProfile.save();
-
-            // Close the database connection
-            await dbClient.close();
-
-            return userProfile;
-        } catch (error) {
-            console.error("Error in updateLocation:", error.message);
-            throw new Error("Update location failed");
-        }
-    }
-
     static async UpdateAvatar(userId, url) {
         try {
             // Connect to the database
@@ -319,7 +207,8 @@ class UserController {
 
     }
 
-
 }
 
 export default UserController;
+
+// UserController.js

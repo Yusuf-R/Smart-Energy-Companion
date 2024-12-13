@@ -33,61 +33,16 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
 import { db } from '@/server/db/fireStore';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { useChatStore } from "@/store/useChatStore";
+import HomeIcon from '@mui/icons-material/Home';
+import BusinessIcon from '@mui/icons-material/Business';
+import BoltIcon from '@mui/icons-material/Bolt';
+import SolarPowerIcon from '@mui/icons-material/SolarPower';
 
 function SideNav({navState, activeRoute, userProfile, activeChatId}) {
     const router = useRouter();
     const [confirmExit, setConfirmExit] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
-    const { inChatView, unreadMessages, setInChatView } = useChatStore();
 
-    useEffect(() => {
-        if (!userProfile?._id) return;
-
-        const chatsRef = collection(db, 'chats');
-        const userChatsQuery = query(
-            chatsRef,
-            where('type', '==', 'medical_consultation'),
-            where('participants', 'array-contains', {
-                userId: userProfile._id,
-                role: 'User',
-                name: userProfile.firstName,
-                status: userProfile.status || 'offline',
-            })
-        );
-
-        const unsubscribe = onSnapshot(userChatsQuery, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'modified') {
-                    const chatData = change.doc.data();
-                    const lastMessage = chatData.lastMessage;
-
-                    // Only add notification if message is from health worker and we're not in chat view
-                    if (lastMessage &&
-                        lastMessage.sender &&
-                        lastMessage.sender.role === 'HealthWorker' &&
-                        lastMessage.status === 'sent' &&
-                        (!inChatView || activeChatId !== change.doc.id)) {
-                        useChatStore.getState().addMessageNotification(change.doc.id);
-                    }
-                }
-            });
-        });
-
-        return () => {
-            unsubscribe();
-        };
-    }, [userProfile?._id, inChatView, activeChatId]);
-
-    // Update chat view status when navigating
-    useEffect(() => {
-        setInChatView(activeRoute === '/user/tools/chat');
-
-        // Clear all notifications when entering chat view
-        if (activeRoute === '/user/tools/chat') {
-            useChatStore.getState().resetAllNotifications();
-        }
-    }, [activeRoute, setInChatView]);
 
     const mutation = useMutation({
         mutationKey: ['Logout'],
@@ -173,37 +128,37 @@ function SideNav({navState, activeRoute, userProfile, activeChatId}) {
             {/* Information Hub */}
             {showText && (
                 <Typography variant="overline" sx={{mb: 0, ml: 1}}>
-                    Information Hub
+                    Literacy
                 </Typography>
             )}
             <List>
                 <ListItem
-                    onClick={() => handleNavigation("/user/info-hub/news")}
-                    sx={{...hoverStyle, ...(activeRoute === "/user/info-hub/news" ? activeStyle : {})}}
+                    onClick={() => handleNavigation("/user/literacy/appliances-ratings")}
+                    sx={{...hoverStyle, ...(activeRoute === "/user/literacy/appliances-ratings" ? activeStyle : {})}}
                 >
                     {showIcons && (
-                        <ListItemIcon sx={{color: "skyblue"}}>
-                            <ArticleIcon/>
+                        <ListItemIcon sx={{color: "Gold"}}>
+                            <BoltIcon/>
                         </ListItemIcon>
                     )}
-                    {showText && <ListItemText primary="News"/>}
+                    {showText && <ListItemText primary="Energy Guide"/>}
                 </ListItem>
 
                 <ListItem
-                    onClick={() => handleNavigation("/user/info-hub/feeds")}
-                    sx={{...hoverStyle, ...(activeRoute === "/user/info-hub/feeds" ? activeStyle : {})}}
+                    onClick={() => handleNavigation("/user/literacy/alt-energy")}
+                    sx={{...hoverStyle, ...(activeRoute === "/user/literacy/alt-energy" ? activeStyle : {})}}
                 >
                     {showIcons && (
                         <ListItemIcon sx={{color: "orange"}}>
-                            <RssFeedIcon/>
+                            <SolarPowerIcon/>
                         </ListItemIcon>
                     )}
-                    {showText && <ListItemText primary="Feeds"/>}
+                    {showText && <ListItemText primary="Alternative Energy"/>}
                 </ListItem>
 
                 <ListItem
-                    onClick={() => handleNavigation("/user/info-hub/tips-guides")}
-                    sx={{...hoverStyle, ...(activeRoute === "/user/info-hub/tips-guides" ? activeStyle : {})}}
+                    onClick={() => handleNavigation("/user/literacy/tips-guides")}
+                    sx={{...hoverStyle, ...(activeRoute === "/user/literacy/tips-guides" ? activeStyle : {})}}
                 >
                     {showIcons && (
                         <ListItemIcon sx={{color: "violet"}}>
@@ -217,7 +172,7 @@ function SideNav({navState, activeRoute, userProfile, activeChatId}) {
             {/* Health Tools */}
             {showText && (
                 <Typography variant="overline" sx={{mb: 0, ml: 1}}>
-                    Personalized Insights
+                    Personalization
                 </Typography>
             )}
             <List>
@@ -233,125 +188,30 @@ function SideNav({navState, activeRoute, userProfile, activeChatId}) {
                     {showText && <ListItemText primary="Overview"/>}
                 </ListItem>
                 <ListItem
-                    onClick={() => handleNavigation("/user/personalized/health-check")}
-                    sx={{...hoverStyle, ...(activeRoute === "/user/personalized/health-check" ? activeStyle : {})}}
+                    onClick={() => handleNavigation("/user/personalization/home")}
+                    sx={{...hoverStyle, ...(activeRoute === "/user/personalization/home" ? activeStyle : {})}}
                 >
                     {showIcons && (
                         <ListItemIcon sx={{color: "limegreen"}}>
-                            <SpaIcon/>
+                            <HomeIcon/>
                         </ListItemIcon>
                     )}
-                    {showText && <ListItemText primary="Health Check"/>}
+                    {showText && <ListItemText primary="Home"/>}
                 </ListItem>
 
                 <ListItem
-                    onClick={() => handleNavigation("/user/personalized/logger")}
-                    sx={{...hoverStyle, ...(activeRoute === "/user/personalized/logger" ? activeStyle : {})}}
+                    onClick={() => handleNavigation("/user/personalization/business")}
+                    sx={{...hoverStyle, ...(activeRoute === "/user/personalization/business" ? activeStyle : {})}}
                 >
                     {showIcons && (
                         <ListItemIcon sx={{color: "gold"}}>
-                            <MonitorHeartIcon/>
+                            <BusinessIcon/>
                         </ListItemIcon>
                     )}
-                    {showText && <ListItemText primary="Logger"/>}
+                    {showText && <ListItemText primary="Business"/>}
                 </ListItem>
             </List>
 
-            {/* Tools & Resources */}
-            {showText && (
-                <Typography variant="overline" sx={{mb: 0, ml: 1}}>
-                    Tools & Resources
-                </Typography>
-            )}
-            <List>
-
-
-                <ListItem
-                    onClick={() => handleNavigation("/user/tools/inbox")}
-                    sx={{...hoverStyle, ...(activeRoute === "/user/tools/inbox" ? activeStyle : {})}}
-                >
-                    {showIcons && (
-                        <ListItemIcon sx={{color: "limegreen"}}>
-                            <MarkEmailUnreadIcon/>
-                        </ListItemIcon>
-                    )}
-                    {showText && <ListItemText primary="Inbox"/>}
-                </ListItem>
-                {/*<ListItem*/}
-                {/*    onClick={() => handleNavigation("/user/tools/notifications")}*/}
-                {/*    sx={{...hoverStyle, ...(activeRoute === "/user/tools/notifications" ? activeStyle : {})}}*/}
-                {/*>*/}
-                {/*    {showIcons && (*/}
-                {/*        <ListItemIcon sx={{color: "gold"}}>*/}
-                {/*            <NotificationsIcon/>*/}
-                {/*        </ListItemIcon>*/}
-                {/*    )}*/}
-                {/*    {showText && <ListItemText primary="Notifications"/>}*/}
-                {/*</ListItem>*/}
-
-                <ListItem
-                    onClick={() => handleNavigation("/user/tools/chat")}
-                    sx={{...hoverStyle, ...(activeRoute === "/user/tools/chat" ? activeStyle : {})}}
-                >
-                    {showIcons && (
-                        <ListItemIcon sx={{color: "limegreen"}}>
-                            <Badge
-                                badgeContent={unreadMessages}
-                                color="error"
-                                sx={{
-                                    '& .MuiBadge-badge': {
-                                        backgroundColor: '#ff4444',
-                                        color: 'white',
-                                    }
-                                }}
-                            >
-                                <QuickreplyIcon />
-                            </Badge>
-                        </ListItemIcon>
-                    )}
-                    {showText && (
-                        <ListItemText
-                            primary={
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <Typography>Chat</Typography>
-                                    {unreadMessages > 0 && (
-                                        <Typography
-                                            component="span"
-                                            sx={{
-                                                ml: 1,
-                                                color: '#ff4444',
-                                                fontSize: '0.75rem',
-                                            }}
-                                        >
-                                            ({unreadMessages} new)
-                                        </Typography>
-                                    )}
-                                </Box>
-                            }
-                        />
-                    )}
-                </ListItem>
-            </List>
-
-            {/*/!* Community Health Trends *!/*/}
-            {/*{showText && (*/}
-            {/*    <Typography variant="overline" sx={{mb: 0, ml: 1}}>*/}
-            {/*        Community Trends*/}
-            {/*    </Typography>*/}
-            {/*)}*/}
-            {/*<List>*/}
-            {/*    <ListItem*/}
-            {/*        onClick={() => handleNavigation("/user/dashboard/health-trends")}*/}
-            {/*        sx={{...hoverStyle, ...(activeRoute === "/user/dashboard/health-trends" ? activeStyle : {})}}*/}
-            {/*    >*/}
-            {/*        {showIcons && (*/}
-            {/*            <ListItemIcon sx={{color: "white"}}>*/}
-            {/*                <ArticleIcon/>*/}
-            {/*            </ListItemIcon>*/}
-            {/*        )}*/}
-            {/*        {showText && <ListItemText primary="Infographics"/>}*/}
-            {/*    </ListItem>*/}
-            {/*</List>*/}
 
             {/* Management */}
             {showText && (

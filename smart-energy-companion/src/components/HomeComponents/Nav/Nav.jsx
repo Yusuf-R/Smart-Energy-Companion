@@ -58,15 +58,10 @@ function Nav() {
             icon: BoltIcon,
             gradient: 'linear-gradient(45deg, #FFD93D, #FF6B6B)'
         },
-        {
-            text: 'Analysis',
-            icon: AssessmentIcon,
-            gradient: 'linear-gradient(45deg, #6C63FF, #4ECDC4)'
-        }
     ];
 
     const GetStarted = () => {
-        router.push('/get-started');
+        router.push('/authorization/user');
     }
 
     return (

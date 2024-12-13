@@ -23,15 +23,7 @@ const PROFILE_FIELDS = [
   { key: 'middleName', label: 'Middle Name' },
   { key: 'email', label: 'Email' },
   { key: 'phoneNumber', label: 'Phone Number' },
-  { key: 'maritalStatus', label: 'Marital Status' },
-  { key: 'country', label: 'Country' },
   { key: 'address', label: 'Address' },
-  { key: 'stateOfOrigin', label: 'State of Origin' },
-  { key: 'stateOfResidence', label: 'State of Residence' },
-  { key: 'lga', label: 'LGA' },
-  { key: 'currlga', label: 'Current LGA' },
-  { key: 'role', label: 'Role' },
-  { key: 'profileStatus', label: 'Profile Status' }
 ];
 
 // Helper function to format field value
@@ -154,10 +146,6 @@ function Profile({ userProfile }) {
         router.push(`/user/settings/profile/avatar`);
     };
 
-    const location = async () => {
-        router.push(`/user/settings/profile/location`);
-    }
-
     return (
         <>
             <Box
@@ -219,21 +207,6 @@ function Profile({ userProfile }) {
                             onClick={updateAvatar}
                             href="/user/settings/profile/avatar"
                             value="/user/settings/profile/avatar"
-                            sx={{
-                                color: "#FFF",
-                                fontWeight: 'bold',
-                                fontSize: xSmall || small || medium || large ? '0.6rem' : '0.9rem',
-                                "&.Mui-selected": {
-                                    color: "#46F0F9",
-                                },
-                            }}
-                        />
-                        <Tab
-                            label="Location"
-                            component={Link}
-                            onClick={location}
-                            href="/user/settings/profile/location"
-                            value="/user/settings/profile/location"
                             sx={{
                                 color: "#FFF",
                                 fontWeight: 'bold',
@@ -400,11 +373,6 @@ function Profile({ userProfile }) {
                                 </Grid>
                               );
                             })}
-
-                            {/* Render complex fields separately */}
-                            {userProfile.emergencyContacts && renderComplexField('Emergency Contacts', userProfile.emergencyContacts)}
-                            {userProfile.wellnessCheckHistory && renderComplexField('Wellness Check History', userProfile.wellnessCheckHistory)}
-                            {userProfile.healthRecords && renderComplexField('Health Records', userProfile.healthRecords)}
                         </Grid>
                     </Box>
                     <br />

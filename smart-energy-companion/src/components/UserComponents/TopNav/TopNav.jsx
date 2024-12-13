@@ -45,114 +45,20 @@ function TopNav({onToggleSideNav, userProfile}) {
     const router = useRouter();
     const pathname = usePathname();
 
-    const formatTimestamp = (timestamp) => {
-        if (!timestamp || !timestamp.toDate) {
-            return 'Just now';
-        }
-        try {
-            return format(timestamp.toDate(), 'MMM d, h:mm a');
-        } catch (error) {
-            console.error('Error formatting timestamp:', error);
-            return 'Invalid date';
-        }
-    };
-
-    // Status color mapping
+      // Status color mapping
     const statusColors = {
         online: '#4CAF50',  // Green
         offline: '#f44336', // Red
         busy: '#ff9800'     // Yellow
     };
 
-    // Fetch notifications in real-time
-    useEffect(() => {
-        if (!userProfile?._id) return;
-
-        const notificationsRef = collection(db, "notifications");
-        const q = query(
-            notificationsRef,
-            where("userId", "==", userProfile._id),
-            orderBy("createdAt", "desc")
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedNotifications = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setNotifications(fetchedNotifications);
-            setUnreadCount(fetchedNotifications.filter((n) => n.status === 'unread').length);
-        });
-
-        return () => unsubscribe();
-    }, [userProfile?._id]);
-
     // Listen to user's online status
     useEffect(() => {
         if (!userProfile?._id) return;
 
-        const userRef = doc(db, "users", userProfile._id);
-        const unsubscribe = onSnapshot(userRef, (doc) => {
-            if (doc.exists()) {
-                setUserStatus(doc.data()?.status || 'offline');
-            }
-        });
+        setUserStatus(userProfile.status);
 
-        return () => unsubscribe();
     }, [userProfile?._id]);
-
-    // Mark a single notification as read
-    const handleMarkAsRead = async (notificationId) => {
-        try {
-            const notificationRef = doc(db, "notifications", notificationId);
-            await updateDoc(notificationRef, {
-                status: 'read',
-                readAt: serverTimestamp()
-            });
-
-            // If notification has a link, navigate to it
-            const notification = notifications.find(n => n.id === notificationId);
-            if (notification?.link) {
-                router.push(notification.link);
-            }
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
-            toast.error('Failed to mark notification as read');
-        }
-    };
-
-    // Mark all notifications as read
-    const handleMarkAllAsRead = async () => {
-        try {
-            const unreadNotifications = notifications.filter(n => n.status === 'unread');
-            const batchPromises = unreadNotifications.map((n) =>
-                updateDoc(doc(db, "notifications", n.id), {
-                    status: 'read',
-                    readAt: serverTimestamp()
-                })
-            );
-            await Promise.all(batchPromises);
-            toast.success('All notifications marked as read');
-        } catch (error) {
-            console.error('Error marking all notifications as read:', error);
-            toast.error('Failed to mark notifications as read');
-        }
-    };
-
-    // Delete a notification
-    const handleDeleteNotification = async (notificationId) => {
-        try {
-            const notificationRef = doc(db, "notifications", notificationId);
-            await updateDoc(notificationRef, {
-                status: 'archived',
-                archivedAt: serverTimestamp()
-            });
-            toast.success('Notification archived');
-        } catch (error) {
-            console.error('Error archiving notification:', error);
-            toast.error('Failed to archive notification');
-        }
-    };
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -174,6 +80,11 @@ function TopNav({onToggleSideNav, userProfile}) {
 
     const handleLogoutClick = async () => {
         setConfirmExit(true);
+        setAnchorEl(null); // Close the dropdown menu when logout is clicked
+    };
+
+    const declinedLogoutClick = async () => {
+        setConfirmExit(false);
         setAnchorEl(null); // Close the dropdown menu when logout is clicked
     };
 
@@ -219,9 +130,9 @@ function TopNav({onToggleSideNav, userProfile}) {
             >
                 {/* Left Section */}
                 <Box sx={{display: "flex", alignItems: "center", gap: 2}}>
-                    <Avatar src="/logo.svg" alt="CHMS" sx={{width: 50, height: 50}}/>
+                    <Avatar src="/logo-1.png" alt="SEC" sx={{width: 50, height: 50}}/>
                     <Typography variant="button" sx={{color: "#FFF"}}>
-                        Community <br/> Health Monitoring System
+                        Smart <br/> Energy Companion
                     </Typography>
                     <IconButton
                         aria-label="Toggle sidebar"
@@ -235,15 +146,6 @@ function TopNav({onToggleSideNav, userProfile}) {
                 {/* Right Section */}
                 <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                     {/* Notifications */}
-                    <IconButton
-                        aria-label="Notifications"
-                        onClick={() => setNotificationsEl(true)}
-                        sx={{color: "#FFF"}}
-                    >
-                        <Badge badgeContent={unreadCount} color="error">
-                            <NotificationsIcon/>
-                        </Badge>
-                    </IconButton>
                     <Box sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -279,9 +181,6 @@ function TopNav({onToggleSideNav, userProfile}) {
                     <Box sx={{textAlign: "left"}}>
                         <Typography variant="body1" sx={{fontWeight: "bold", color: '#FFF'}}>
                             {userProfile?.firstName || "User Name"}
-                        </Typography>
-                        <Typography variant="body2" color="#FFF">
-                            Profile
                         </Typography>
                     </Box>
                     <IconButton aria-label="Open profile menu" onClick={handleMenuOpen}>
@@ -327,7 +226,7 @@ function TopNav({onToggleSideNav, userProfile}) {
                         <DialogContentText>Are you sure you want to logout?</DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => setConfirmExit(false)} variant="contained" color="success">
+                        <Button onClick={declinedLogoutClick} variant="contained" color="success">
                             No
                         </Button>
                         <Button
@@ -349,239 +248,6 @@ function TopNav({onToggleSideNav, userProfile}) {
                         </Button>
                     </DialogActions>
                 </Dialog>
-
-                {/* Notifications Drawer */}
-                <Drawer
-                    anchor="right"
-                    open={notificationsEl}
-                    onClose={() => setNotificationsEl(false)}
-                    PaperProps={{
-                        sx: {
-                            width: { xs: '100%', sm: 380 },
-                            background: '#f8fafc'
-                        }
-                    }}
-                >
-                    <Box
-                        sx={{
-                            p: 2.5,
-                            borderBottom: '1px solid',
-                            borderColor: 'divider',
-                            background: '#fff'
-                        }}
-                    >
-                        <Box sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
-                            mb: 0.5
-                        }}>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    fontWeight: 600,
-                                    color: 'text.primary'
-                                }}
-                            >
-                                Notifications
-                            </Typography>
-                            <IconButton
-                                size="small"
-                                onClick={() => setNotificationsEl(false)}
-                                sx={{
-                                    color: 'text.secondary',
-                                    '&:hover': {
-                                        background: 'rgba(0,0,0,0.04)'
-                                    }
-                                }}
-                            >
-                                <CloseIcon />
-                            </IconButton>
-                        </Box>
-                        {unreadCount > 0 && (
-                            <Button
-                                size="small"
-                                onClick={handleMarkAllAsRead}
-                                sx={{
-                                    fontSize: '0.8125rem',
-                                    color: 'primary.main',
-                                    '&:hover': {
-                                        background: 'rgba(25, 118, 210, 0.04)'
-                                    }
-                                }}
-                            >
-                                Mark all as read
-                            </Button>
-                        )}
-                    </Box>
-
-                    <List sx={{
-                        p: 0,
-                        height: 'calc(100% - 73px)',
-                        overflowY: 'auto',
-                        '&::-webkit-scrollbar': {
-                            width: '6px',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                            backgroundColor: 'rgba(0,0,0,0.2)',
-                            borderRadius: '3px',
-                        }
-                    }}>
-                        {notifications.length === 0 ? (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    height: '100%',
-                                    p: 3,
-                                    textAlign: 'center'
-                                }}
-                            >
-                                <NotificationsIcon
-                                    sx={{
-                                        fontSize: 48,
-                                        color: 'text.disabled',
-                                        mb: 1
-                                    }}
-                                />
-                                <Typography
-                                    variant="h6"
-                                    sx={{
-                                        color: 'text.primary',
-                                        mb: 0.5
-                                    }}
-                                >
-                                    No Notifications
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                >
-                                    You're all caught up! Check back later for new notifications.
-                                </Typography>
-                            </Box>
-                        ) : (
-                            notifications.map((notification) => (
-                                <ListItem
-                                    key={notification.id}
-                                    sx={{
-                                        px: 2.5,
-                                        py: 2,
-                                        borderBottom: '1px solid',
-                                        borderColor: 'divider',
-                                        bgcolor: notification.status === 'unread'
-                                            ? 'rgba(25, 118, 210, 0.04)'
-                                            : '#fff',
-                                        transition: 'background-color 0.2s',
-                                        '&:hover': {
-                                            bgcolor: 'rgba(0,0,0,0.02)',
-                                            cursor: 'pointer'
-                                        }
-                                    }}
-                                    onClick={() => notification.status === 'unread' && handleMarkAsRead(notification.id)}
-                                >
-                                    <Box sx={{ width: '100%' }}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'flex-start',
-                                                mb: 0.5
-                                            }}
-                                        >
-                                            <Typography
-                                                variant="subtitle2"
-                                                sx={{
-                                                    fontWeight: notification.status === 'unread' ? 600 : 500,
-                                                    color: 'text.primary',
-                                                    pr: 2
-                                                }}
-                                            >
-                                                {notification.title}
-                                            </Typography>
-                                            <Typography
-                                                variant="caption"
-                                                sx={{
-                                                    color: 'text.secondary',
-                                                    whiteSpace: 'nowrap'
-                                                }}
-                                            >
-                                                {formatTimestamp(notification.createdAt)}
-                                            </Typography>
-                                        </Box>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'text.secondary',
-                                                mb: 1,
-                                                lineHeight: 1.5
-                                            }}
-                                        >
-                                            {notification.message}
-                                        </Typography>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center'
-                                        }}>
-                                            {notification.actionUrl && (
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        router.push(notification.actionUrl);
-                                                        setNotificationsEl(false);
-                                                    }}
-                                                    sx={{
-                                                        textTransform: 'none',
-                                                        borderRadius: 1.5
-                                                    }}
-                                                >
-                                                    View Details
-                                                </Button>
-                                            )}
-                                            <Box sx={{ ml: 'auto' }}>
-                                                {notification.status === 'unread' && (
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleMarkAsRead(notification.id);
-                                                        }}
-                                                        sx={{
-                                                            mr: 1,
-                                                            color: 'primary.main'
-                                                        }}
-                                                    >
-                                                        <UnreadIcon sx={{ fontSize: 12 }} />
-                                                    </IconButton>
-                                                )}
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteNotification(notification.id);
-                                                    }}
-                                                    sx={{
-                                                        color: 'text.secondary',
-                                                        '&:hover': {
-                                                            color: 'error.main'
-                                                        }
-                                                    }}
-                                                >
-                                                    <CloseIcon sx={{ fontSize: 16 }} />
-                                                </IconButton>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                </ListItem>
-                            ))
-                        )}
-                    </List>
-                </Drawer>
             </Box>
         </>
     )

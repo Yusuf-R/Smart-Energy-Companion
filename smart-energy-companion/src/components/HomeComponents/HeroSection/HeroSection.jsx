@@ -2,8 +2,8 @@ import { Box, Container, Grid, Typography, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
-const MotionBox = motion(Box);
-const MotionTypography = motion(Typography);
+const MotionBox = motion.create(Box);
+const MotionTypography = motion.create(Typography);
 
 export default function HeroSection() {
   const router = useRouter();
@@ -100,7 +100,7 @@ export default function HeroSection() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => router.push('/get-started')}
+                  onClick={() => router.push('/authorization/user')}
                   sx={{
                     background: 'linear-gradient(90deg, #2196F3, #4CAF50)',
                     '&:hover': {
@@ -113,7 +113,7 @@ export default function HeroSection() {
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => router.push('/explore')}
+                  onClick={() => router.push('/literacy')}
                   sx={{
                     borderColor: '#2196F3',
                     color: '#2196F3',

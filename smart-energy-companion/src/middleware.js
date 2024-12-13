@@ -9,6 +9,8 @@ export async function middleware(req) {
         const publicRoutes = [
             '/api/v1/auth/user/register',
             '/api/v1/auth/user/login',
+            '/api/v1/auth/admin/register',
+            '/api/v1/auth/admin/login',
             '/api/v1/auth/db/test',
             '/api/v1/auth/decrypt',
         ];

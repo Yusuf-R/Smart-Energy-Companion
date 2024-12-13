@@ -28,13 +28,13 @@ const categories = [
         route: "/literacy/terminologies",
         btnColor: "#00BCD4",
     },
-    {
-        title: "Metering Equipment",
-        description: "Explore the features of prepaid and postpaid meters.",
-        icon: <EnergyIcon/>,
-        route: "/literacy/metering-equipment",
-        btnColor: "#cc8500",
-    },
+    // {
+    //     title: "Metering Equipment",
+    //     description: "Explore the features of prepaid and postpaid meters.",
+    //     icon: <EnergyIcon/>,
+    //     route: "/literacy/metering-equipment",
+    //     btnColor: "#cc8500",
+    // },
     {
         title: "Optimization",
         description: "Practical tips for saving energy at home and in the office.",

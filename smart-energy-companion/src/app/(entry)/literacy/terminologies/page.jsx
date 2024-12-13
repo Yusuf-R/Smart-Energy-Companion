@@ -1,9 +1,10 @@
-import UnderConstruction from '@/components/UnderConstruction/UnderConstruction'
+
+import EnergyTerminology from "@/components/HomeComponents/LiteracyComponents/EnergyTerminology/EnergyTerminology"
 
 function Terminologies() {
     return (
         <>
-            <UnderConstruction/>
+            <EnergyTerminology/>
         </>
     )
 }

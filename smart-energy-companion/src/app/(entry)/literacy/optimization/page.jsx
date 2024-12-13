@@ -1,9 +1,9 @@
-import UnderConstruction from '@/components/UnderConstruction/UnderConstruction'
+import EnergyOptimization from "@/components/HomeComponents/LiteracyComponents/EnergyOptimization/EnergyOptimization"
 
 function Optimization() {
     return (
         <>
-            <UnderConstruction/>
+            <EnergyOptimization/>
         </>
     )
 }

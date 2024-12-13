@@ -1,8 +1,8 @@
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import AuthController from '@/server/controllers/AuthController';
-import getCareBaseModels from '@/server/models/CareBase/CareBase';
 import dbClient from '@/server/db/mongoDb';
+import getEnergyCompanionModels from "@/server/models/EnergyCompanion/EnergyCompanion";
 
 const options = {
     providers: [
@@ -22,13 +22,13 @@ const options = {
                     // Ensure connection to the database
                     await dbClient.connect();
 
-                    const { User, HealthWorker } = await getCareBaseModels();
-                    const Model = credentials?.role === 'HealthWorker' ? HealthWorker : User;
+                    // Load the models (all roles use the same Navigator base schema)
+                    const { EnergyCompanion } = await getEnergyCompanionModels();
 
-                    // Attempt to find the user and validate credentials
-                    const user = await Model.findOne({ email: credentials?.email }).select("+password");
+                    // Find the user by email
+                    const user = await EnergyCompanion.findOne({ email: credentials.email }).select("+password");
                     if (!user) {
-                        return new Error("User not found");
+                      return new Error("User not found");
                     }
                     const isPasswordValid = await AuthController.comparePassword(credentials?.password, user.password);
                     if (!isPasswordValid) {

@@ -1,5 +1,5 @@
-'use client';
-import React from 'react';
+"use client";
+import React from "react";
 import {
     Box,
     Typography,
@@ -11,19 +11,19 @@ import {
     useTheme,
     Avatar,
     IconButton,
-} from '@mui/material';
-import { motion } from 'framer-motion';
+} from "@mui/material";
+import { motion } from "framer-motion";
 import {
-    LocalHospital,
-    EventNote,
-    Message,
-    Favorite,
+    Bolt,
+    Assessment,
+    Insights,
+    BatteryChargingFull,
     ArrowForward,
     PlayArrow,
-    HealthAndSafety,
-    MonitorHeart,
-} from '@mui/icons-material';
-import {useRouter} from "next/navigation";
+    Power,
+    Lightbulb,
+} from "@mui/icons-material";
+import { useRouter } from "next/navigation";
 
 const FeatureCard = ({ icon, title, description, delay }) => {
     const theme = useTheme();
@@ -36,15 +36,15 @@ const FeatureCard = ({ icon, title, description, delay }) => {
         >
             <Card
                 sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                        transform: 'translateY(-8px)',
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                        transform: "translateY(-8px)",
                         boxShadow: theme.shadows[8],
-                        '& .feature-icon': {
-                            transform: 'scale(1.1)',
+                        "& .feature-icon": {
+                            transform: "scale(1.1)",
                         },
                     },
                 }}
@@ -52,8 +52,8 @@ const FeatureCard = ({ icon, title, description, delay }) => {
                 <CardContent>
                     <Box
                         sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             mb: 2,
                         }}
                     >
@@ -63,7 +63,7 @@ const FeatureCard = ({ icon, title, description, delay }) => {
                                 bgcolor: theme.palette.secondary.main,
                                 width: 56,
                                 height: 56,
-                                transition: 'transform 0.3s ease',
+                                transition: "transform 0.3s ease",
                             }}
                         >
                             {icon}
@@ -97,40 +97,44 @@ const GetStarted = () => {
     const router = useRouter();
 
     const handleGetStarted = () => {
-        router.push('/user/settings/profile/update');
+        router.push("/user/settings/profile/update");
     };
 
     const features = [
         {
-            icon: <LocalHospital sx={{ fontSize: 32 }} />,
-            title: 'Find Healthcare',
-            description: 'Connect with qualified health workers in your community for personalized care and consultations.',
+            icon: <Bolt sx={{ fontSize: 32 }} />,
+            title: "Track Energy Usage",
+            description:
+                "Monitor your household or business energy consumption with detailed insights.",
         },
         {
-            icon: <EventNote sx={{ fontSize: 32 }} />,
-            title: 'Book Appointments',
-            description: 'Schedule appointments with health workers at your convenience, with easy rescheduling options.',
+            icon: <Assessment sx={{ fontSize: 32 }} />,
+            title: "Optimize Energy Usage",
+            description:
+                "Gain valuable insights into energy usage patterns to optimize efficiency.",
         },
         {
-            icon: <Message sx={{ fontSize: 32 }} />,
-            title: 'Health Chat',
-            description: 'Securely communicate with your healthcare providers and get quick responses to your queries.',
+            icon: <Insights sx={{ fontSize: 32 }} />,
+            title: "Cost Estimation",
+            description:
+                "Estimate energy costs based on usage and plan ahead for budget management.",
         },
         {
-            icon: <Favorite sx={{ fontSize: 32 }} />,
-            title: 'Health Tracking',
-            description: 'Monitor your health metrics, track medications, and maintain your personal health records.',
+            icon: <BatteryChargingFull sx={{ fontSize: 32 }} />,
+            title: "Sustainable Solutions",
+            description:
+                "Explore alternative power sources to reduce energy costs and environmental impact.",
         },
     ];
 
     return (
-        <Box sx={{ py: 8, px: 3 }}>
+        <Box sx={{ py: 5, px: 3 }}>
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <Box sx={{ textAlign: 'center', mb: 8 }}>
+                <Box sx={{ textAlign: "center", mb: 8 }}>
                     <Typography
                         variant="h3"
                         component="h1"
@@ -138,39 +142,39 @@ const GetStarted = () => {
                         sx={{
                             fontWeight: 700,
                             background: `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-                            backgroundClip: 'text',
-                            textFillColor: 'transparent',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: "text",
+                            textFillColor: "transparent",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
                         }}
                     >
-                        Your Health Journey Starts Here
+                        Empower Your Energy Decisions
                     </Typography>
                     <Typography
                         variant="h6"
                         color="#FFF"
                         sx={{
                             mb: 4,
-                            maxWidth: '800px',
-                            mx: 'auto',
-                            lineHeight: 1.6
+                            maxWidth: "800px",
+                            mx: "auto",
+                            lineHeight: 1.6,
                         }}
                     >
-                        Access quality healthcare, connect with health workers, and take control of your well-being
+                        Take control of your energy usage, optimize efficiency, and save on costs with our Smart Energy Companion.
                     </Typography>
                     <Button
                         variant="contained"
                         size="large"
                         endIcon={<PlayArrow />}
                         sx={{
-                            borderRadius: '28px',
+                            borderRadius: "28px",
                             px: 4,
                             py: 1.5,
-                            textTransform: 'none',
-                            fontSize: '1.1rem',
+                            textTransform: "none",
+                            fontSize: "1.1rem",
                             background: `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                            '&:hover': {
+                            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+                            "&:hover": {
                                 background: `linear-gradient(45deg, ${theme.palette.secondary.dark}, ${theme.palette.primary.dark})`,
                             },
                         }}
@@ -198,30 +202,30 @@ const GetStarted = () => {
                         mt: 8,
                         p: 4,
                         background: `linear-gradient(135deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-                        color: 'white',
+                        color: "white",
                         borderRadius: 4,
-                        overflow: 'hidden',
-                        position: 'relative',
+                        overflow: "hidden",
+                        position: "relative",
                     }}
                 >
                     <Box
                         sx={{
-                            position: 'absolute',
+                            position: "absolute",
                             top: 0,
                             right: 0,
-                            width: '150px',
-                            height: '150px',
-                            background: 'rgba(255,255,255,0.1)',
-                            borderRadius: '0 0 0 150px',
+                            width: "150px",
+                            height: "150px",
+                            background: "rgba(255,255,255,0.1)",
+                            borderRadius: "0 0 0 150px",
                         }}
                     />
                     <Grid container spacing={4} alignItems="center">
                         <Grid item xs={12} md={8}>
                             <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-                                Ready to prioritize your health?
+                                Ready to Optimize Your Energy?
                             </Typography>
                             <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
-                                Join our community of health-conscious individuals and get access to quality healthcare services.
+                                Join our platform to access advanced tools for monitoring, analyzing, and reducing your energy costs.
                             </Typography>
                             <Button
                                 variant="contained"
@@ -229,14 +233,14 @@ const GetStarted = () => {
                                 endIcon={<ArrowForward />}
                                 onClick={handleGetStarted}
                                 sx={{
-                                    borderRadius: '28px',
+                                    borderRadius: "28px",
                                     px: 4,
                                     py: 1.5,
-                                    textTransform: 'none',
-                                    bgcolor: 'white',
+                                    textTransform: "none",
+                                    bgcolor: "white",
                                     color: theme.palette.secondary.main,
-                                    '&:hover': {
-                                        bgcolor: 'rgba(255,255,255,0.9)',
+                                    "&:hover": {
+                                        bgcolor: "rgba(255,255,255,0.9)",
                                     },
                                 }}
                             >
@@ -246,34 +250,34 @@ const GetStarted = () => {
                         <Grid item xs={12} md={4}>
                             <Box
                                 sx={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
+                                    display: "flex",
+                                    justifyContent: "center",
                                     gap: 2,
                                 }}
                             >
                                 <IconButton
                                     sx={{
-                                        bgcolor: 'rgba(255,255,255,0.15)',
-                                        '&:hover': {
-                                            bgcolor: 'rgba(255,255,255,0.25)',
-                                            transform: 'scale(1.1)',
+                                        bgcolor: "rgba(255,255,255,0.15)",
+                                        "&:hover": {
+                                            bgcolor: "rgba(255,255,255,0.25)",
+                                            transform: "scale(1.1)",
                                         },
-                                        transition: 'all 0.3s ease',
+                                        transition: "all 0.3s ease",
                                     }}
                                 >
-                                    <HealthAndSafety sx={{ fontSize: 32, color: 'white' }} />
+                                    <Power sx={{ fontSize: 32, color: "white" }} />
                                 </IconButton>
                                 <IconButton
                                     sx={{
-                                        bgcolor: 'rgba(255,255,255,0.15)',
-                                        '&:hover': {
-                                            bgcolor: 'rgba(255,255,255,0.25)',
-                                            transform: 'scale(1.1)',
+                                        bgcolor: "rgba(255,255,255,0.15)",
+                                        "&:hover": {
+                                            bgcolor: "rgba(255,255,255,0.25)",
+                                            transform: "scale(1.1)",
                                         },
-                                        transition: 'all 0.3s ease',
+                                        transition: "all 0.3s ease",
                                     }}
                                 >
-                                    <MonitorHeart sx={{ fontSize: 32, color: 'white' }} />
+                                    <Lightbulb sx={{ fontSize: 32, color: "white" }} />
                                 </IconButton>
                             </Box>
                         </Grid>

@@ -1,42 +1,57 @@
 'use client';
-import { useState } from 'react';
+import {useState} from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
-import { Controller, useForm } from "react-hook-form";
-import { Email, Visibility, VisibilityOff } from '@mui/icons-material';
-import { FormControl, IconButton } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import { GitHub, Google, Apple } from '@mui/icons-material';
-import { keyframes } from '@mui/system';
-import { signUpValidator, loginValidator } from '@/validators/userValidators';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import {Controller, useForm} from "react-hook-form";
+import {Apple, Email, GitHub, Google, Visibility, VisibilityOff} from '@mui/icons-material';
+import {FormControl, IconButton, useMediaQuery, useTheme} from '@mui/material';
+import {AnimatePresence, motion} from 'framer-motion';
+import {keyframes} from '@mui/system';
+import {loginValidator, signUpValidator} from '@/validators/userValidators';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {toast} from 'sonner';
+import {useMutation} from "@tanstack/react-query";
+import {useRouter} from "next/navigation";
 import AdminUtils from "@/utils/AdminUtils";
-import { signIn } from "next-auth/react";
-import { useMediaQuery, useTheme } from '@mui/material';
+import {signIn} from "next-auth/react";
 import CircularProgress from '@mui/material/CircularProgress';
 
 const borderAnimation = keyframes`
-  0% { border-color: #FF6347; }
-  25% { border-color: #46F0F9; }
-  50% { border-color: #34C0D9; }
-  75% { border-color: #8D3BFF; }
-  100% { border-color: #FF6347; }
+    0% {
+        border-color: #FF6347;
+    }
+    25% {
+        border-color: #46F0F9;
+    }
+    50% {
+        border-color: #34C0D9;
+    }
+    75% {
+        border-color: #8D3BFF;
+    }
+    100% {
+        border-color: #FF6347;
+    }
 `;
 
 const textGradientAnimation = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 `;
 
 export default function LoginSignUp() {
     const theme = useTheme();
+    const router = useRouter();
 
     // Breakpoints
     const xSmall = useMediaQuery(theme.breakpoints.down("xs"));
@@ -64,7 +79,7 @@ export default function LoginSignUp() {
         }
     };
 
-    const { control, handleSubmit, formState: { errors } } = useForm({
+    const {control, handleSubmit, formState: {errors}} = useForm({
         mode: "onTouched",
         resolver: zodResolver(isLogin ? loginValidator : signUpValidator),
         reValidateMode: "onChange",
@@ -107,88 +122,117 @@ export default function LoginSignUp() {
         mutationKey: ["Login"],
         mutationFn: AdminUtils.userLogin,
     });
-    const router = useRouter();
 
-    // for registration
+
+    // Register a new user
     const onRegister = async (objData) => {
-        toast.info('Registering... 🚀');
-        setToLogin(true);
-        // we ensure validation with our schema
-        const { success, data } = signUpValidator.safeParse(objData);
-        if (!success) {
-            toast.error('Data Validation Failed');
-            setToLogin(false);
-            return;
-        }
-        console.log('Data successfully validated');
-        const encryptedData = await AdminUtils.encryptCredentials(data);
-        mutationRegister.mutate({ encryptedData }, {
-            onSuccess: async (responseData) => {
-                toast.success("Registration successful 🚀");
-                const signInResponse = await signIn('credentials', {
-                    redirect: false,
-                    email: data.email,
-                    password: data.password,
-                    role: responseData.role,
-                });
-                if (signInResponse.ok) {
-                    toast.success("Redirecting to dashboard 📡");
-                    setToLogin(false);
-                    router.push('/user/dashboard');
-                } else {
-                    toast.error("Automatic login failed. Please login manually. 💺");
-                    setToLogin(false);
-                    toast.info("Kindly login manually 🔭");
-                    router.push('/authorization/users')
-                }
-            },
-            onError: (error) => {
-                toast.error(error.message);
+        try {
+            toast.info('Registering... 🚀');
+            setToLogin(true);
+
+            // Validate with schema
+            const {success, data} = signUpValidator.safeParse(objData);
+            if (!success) {
+                toast.error('Data Validation Failed');
                 setToLogin(false);
-            },
-        });
+                return;
+            }
+
+            console.log('Data successfully validated');
+            const encryptedData = await AdminUtils.encryptCredentials(data);
+            mutationRegister.mutate({ encryptedData }, {
+                onSuccess: async (responseData) => {
+                    try {
+                        toast.success("Registration successful 🚀");
+                        const signInResponse = await signIn('credentials', {
+                            redirect: false,
+                            email: data.email,
+                            password: data.password,
+                            role: responseData.role,
+                        });
+
+                        if (signInResponse.ok) {
+                            toast.success("Redirecting to dashboard 📡");
+                            setToLogin(false);
+                            router.push('/user/dashboard');
+                        } else {
+                            toast.error("Automatic login failed. Please login manually. 💺");
+                            setToLogin(false);
+                            toast.info("Kindly login manually 🔭");
+                            router.push('/authorization/users');
+                        }
+                    } catch (signInError) {
+                        console.error('Error during automatic login:', signInError);
+                        toast.error("Automatic login failed. Please try again.");
+                        setToLogin(false);
+                    }
+                },
+                onError: (error) => {
+                    toast.error(`Registration Error: ${error.message}`);
+                    setToLogin(false);
+                },
+            });
+        } catch (error) {
+            console.error('Unexpected error during registration:', error);
+            toast.error("An unexpected error occurred during registration.");
+            setToLogin(false);
+        }
     };
 
-    //  for logging in 
+    // Login an existing user
     const onLogin = async (objData) => {
-        setToLogin(true);
-        // we ensure validation with our schema
-        const { success, data } = loginValidator.safeParse(objData);
-        if (!success) {
-            toast.error('Data Validation Failed');
-            setToLogin(false);
-            return;
-        }
-        console.log('Data successfully validated');
-        const encryptedData = await AdminUtils.encryptCredentials(data);
-        mutationLogin.mutate({ encryptedData }, {
-            onSuccess: async (responseData) => {
-                toast.success("Login successful 🚀");
-                // Log in the user immediately after successful registration
-                const loginResult = await signIn("credentials", {
-                    email: data.email,
-                    password: data.password,
-                    role: responseData.role,
-                    redirect: false,
-                });
+        try {
+            setToLogin(true);
 
-                if (loginResult.ok) {
-                    toast.success("Redirecting to dashboard 💡");
-                    setToLogin(false);
-                    router.push('/user/dashboard'); // Redirect to dashboard
-                } else {
-                    toast.error("Login failed after registration");
-                    setToLogin(false);
-                }
-            },
-
-            onError: (error) => {
-                toast.error("Error: Invalid Credentials");
-                toast.error(error.message);
+            // Validate with schema
+            const {success, data} = loginValidator.safeParse(objData);
+            if (!success) {
+                toast.error('Data Validation Failed');
                 setToLogin(false);
-            },
-        });
-    }
+                return;
+            }
+
+            console.log('Data successfully validated');
+            const encryptedData = await AdminUtils.encryptCredentials(data);
+
+            // Attempt login mutation
+            mutationLogin.mutate({encryptedData}, {
+                onSuccess: async (responseData) => {
+                    try {
+                        toast.success("Login successful 🚀");
+                        const loginResult = await signIn("credentials", {
+                            email: data.email,
+                            password: data.password,
+                            role: responseData.role,
+                            redirect: false,
+                        });
+
+                        if (loginResult.ok) {
+                            toast.success("Redirecting to dashboard 💡");
+                            setToLogin(false);
+                            router.push('/user/dashboard'); // Redirect to dashboard
+                        } else {
+                            toast.error("Login failed. Please try again.");
+                            setToLogin(false);
+                        }
+                    } catch (signInError) {
+                        console.error('Error during login:', signInError);
+                        toast.error("An unexpected error occurred during login.");
+                        setToLogin(false);
+                    }
+                },
+                onError: (error) => {
+                    toast.error("Error: Invalid Credentials");
+                    toast.error(error.message);
+                    setToLogin(false);
+                },
+            });
+        } catch (error) {
+            console.error('Unexpected error during login:', error);
+            toast.error("An unexpected error occurred during login.");
+            setToLogin(false);
+        }
+    };
 
     // if errors exist, then log it or toast it
     if (Object.keys(errors).length > 0) {
@@ -210,13 +254,16 @@ export default function LoginSignUp() {
                 color: '#FFF',
                 marginTop: '5x',
                 overflow: 'hidden',
+                background: 'url(/bg-6.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
             }}
         >
             <Typography
                 variant="h4"
                 sx={{
                     fontWeight: 'bold',
-                    mb: 5,
+                    mr: 2, // Add spacing between text and image
                     backgroundImage: 'linear-gradient(270deg, #FF6347, #46F0F9, #34C0D9, #8D3BFF, #FF6347)',
                     backgroundSize: '150% 150%',
                     backgroundClip: 'text',
@@ -225,11 +272,19 @@ export default function LoginSignUp() {
                     animation: `${textGradientAnimation} 5s ease infinite`,
                 }}
             >
-                Community Health Monitoring System 🩺
+                Smart Energy Companion
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 5 , textAlign:'center'}}>
-                To get started, please login or sign up.
-            </Typography>
+            <Box
+                component="img"
+                src={'/logo-3.png'}
+                alt="Energy Icon"
+                sx={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: '50%',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                }}
+            />
             {/* Toggle Slider */}
             <Box
                 sx={{
@@ -246,8 +301,8 @@ export default function LoginSignUp() {
             >
                 {/* Sliding toggle button with smoother transition */}
                 <motion.div
-                    animate={{ x: isLogin ? 0 : 150 }} // Sliding between positions
-                    transition={{ duration: 0.4, ease: "easeInOut" }} // Smooth animation
+                    animate={{x: isLogin ? 0 : 150}} // Sliding between positions
+                    transition={{duration: 0.4, ease: "easeInOut"}} // Smooth animation
                     style={{
                         width: '50%',
                         height: '100%',
@@ -268,14 +323,14 @@ export default function LoginSignUp() {
                 >
                     <Typography
                         variant="body1"
-                        sx={{ color: isLogin ? '#000' : '#777', fontWeight: 'bold', cursor: 'pointer' }}
+                        sx={{color: isLogin ? '#000' : '#777', fontWeight: 'bold', cursor: 'pointer'}}
                         onClick={() => handleToggle('login')}
                     >
                         Login
                     </Typography>
                     <Typography
                         variant="body1"
-                        sx={{ color: isLogin ? '#777' : '#000', fontWeight: 'bold', cursor: 'pointer' }}
+                        sx={{color: isLogin ? '#777' : '#000', fontWeight: 'bold', cursor: 'pointer'}}
                         onClick={() => handleToggle('signup')}
                     >
                         Sign Up
@@ -296,11 +351,11 @@ export default function LoginSignUp() {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={isLogin ? 'login' : 'signup'}
-                        initial={{ x: isLogin ? 300 : -300, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: isLogin ? -300 : 300, opacity: 0 }}
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                        style={{ width: '100%', position: 'absolute' }} // Keeps the form centered
+                        initial={{x: isLogin ? 300 : -300, opacity: 0}}
+                        animate={{x: 0, opacity: 1}}
+                        exit={{x: isLogin ? -300 : 300, opacity: 0}}
+                        transition={{duration: 0.5, ease: "easeInOut"}}
+                        style={{width: '100%', position: 'absolute'}} // Keeps the form centered
                     >
                         <Box
 
@@ -314,7 +369,7 @@ export default function LoginSignUp() {
                                 maxWidth: '100%',
                             }}
                         >
-                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+                            <Typography variant="h6" sx={{fontWeight: 'bold', mb: 1}}>
                                 {isLogin ? 'Login' : 'Sign Up'}
                             </Typography>
 
@@ -324,16 +379,16 @@ export default function LoginSignUp() {
                                     name="email"
                                     control={control}
                                     defaultValue=""
-                                    rules={{ required: "Email is required" }}
-                                    render={({ field }) => (
+                                    rules={{required: "Email is required"}}
+                                    render={({field}) => (
                                         <TextField
                                             {...field}
                                             InputProps={{
                                                 sx: txProps,
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <IconButton edge="end" sx={{ color: 'gold' }}>
-                                                            <Email size={xSmall || small || medium ? 12 : 24} />
+                                                        <IconButton edge="end" sx={{color: 'gold'}}>
+                                                            <Email size={xSmall || small || medium ? 12 : 24}/>
                                                         </IconButton>
                                                     </InputAdornment>
                                                 ),
@@ -348,7 +403,7 @@ export default function LoginSignUp() {
                                                 },
                                                 shrink: true,
                                             }}
-                                            sx={{ mb: 5, mt: 1 }}
+                                            sx={{mb: 5, mt: 1}}
                                             label="Email"
                                             variant="outlined"
                                             autoComplete="off"
@@ -366,8 +421,8 @@ export default function LoginSignUp() {
                                     name="password"
                                     control={control}
                                     defaultValue=""
-                                    rules={{ required: "Password is required" }}
-                                    render={({ field }) => (
+                                    rules={{required: "Password is required"}}
+                                    render={({field}) => (
                                         <TextField
                                             {...field}
                                             fullWidth
@@ -382,8 +437,8 @@ export default function LoginSignUp() {
                                                             color="error"
                                                         >
                                                             {isLogin
-                                                                ? (loginPassword ? <VisibilityOff /> : <Visibility />)
-                                                                : (registerPassword ? <VisibilityOff /> : <Visibility />)
+                                                                ? (loginPassword ? <VisibilityOff/> : <Visibility/>)
+                                                                : (registerPassword ? <VisibilityOff/> : <Visibility/>)
                                                             }
                                                         </IconButton>
                                                     </InputAdornment>
@@ -398,7 +453,7 @@ export default function LoginSignUp() {
                                                 },
                                                 shrink: true,
                                             }}
-                                            sx={{ marginBottom: 5 }}
+                                            sx={{marginBottom: 5}}
                                             label="Password"
                                             variant="outlined"
                                             autoComplete="off"
@@ -419,8 +474,8 @@ export default function LoginSignUp() {
                                         name="confirmPassword"
                                         control={control}
                                         defaultValue=""
-                                        rules={{ required: "Confirm Password is required" }}
-                                        render={({ field }) => (
+                                        rules={{required: "Confirm Password is required"}}
+                                        render={({field}) => (
                                             <TextField
                                                 {...field}
                                                 fullWidth
@@ -434,7 +489,8 @@ export default function LoginSignUp() {
                                                                 edge="end"
                                                                 color="error"
                                                             >
-                                                                {confirmRegisterPassword ? <VisibilityOff /> : <Visibility />}
+                                                                {confirmRegisterPassword ? <VisibilityOff/> :
+                                                                    <Visibility/>}
                                                             </IconButton>
                                                         </InputAdornment>
                                                     ),
@@ -448,7 +504,7 @@ export default function LoginSignUp() {
                                                     },
                                                     shrink: true,
                                                 }}
-                                                sx={{ marginBottom: 5 }}
+                                                sx={{marginBottom: 5}}
                                                 label="Confirm Password"
                                                 variant="outlined"
                                                 autoComplete="off"
@@ -468,47 +524,49 @@ export default function LoginSignUp() {
                                 fullWidth
                                 sx={{
                                     ...(toLogin && {
-                                        pointerEvents: 'none', 
+                                        pointerEvents: 'none',
                                         opacity: 1,
                                     }),
                                     mt: 2,
                                     backgroundColor: '#00cc00'
                                 }}
                                 type="submit"
-                                endIcon={toLogin && <CircularProgress size={20} color="inherit" />}
+                                endIcon={toLogin && <CircularProgress size={20} color="inherit"/>}
                             >
                                 {isLogin ? 'Login' : 'Sign Up'}
                             </Button>
 
                             {/* Social Logins */}
-                            <Box sx={{ mt: 3 }}>
+                            <Box sx={{mt: 3}}>
                                 <Typography variant="body2">Or continue with</Typography>
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, gap: 2 }}>
+                                <Box sx={{display: 'flex', justifyContent: 'center', mt: 1, gap: 2}}>
                                     <IconButton>
-                                        <Google color="primary" />
+                                        <Google color="primary"/>
                                     </IconButton>
                                     <IconButton>
-                                        <GitHub color="primary" />
+                                        <GitHub color="primary"/>
                                     </IconButton>
                                     <IconButton>
-                                        <Apple color="primary" />
+                                        <Apple color="primary"/>
                                     </IconButton>
                                 </Box>
                             </Box>
 
                             {/* Toggle Prompt */}
-                            <Box sx={{ mt: 3 }}>
+                            <Box sx={{mt: 3}}>
                                 {isLogin ? (
                                     <Typography variant="body2">
                                         Don't have an account?{' '}
-                                        <span style={{ color: '#46F0F9', cursor: 'pointer' }} onClick={() => handleToggle('signup')}>
+                                        <span style={{color: '#46F0F9', cursor: 'pointer'}}
+                                              onClick={() => handleToggle('signup')}>
                                             Sign Up
                                         </span>
                                     </Typography>
                                 ) : (
                                     <Typography variant="body2">
                                         Already have an account?{' '}
-                                        <span style={{ color: '#46F0F9', cursor: 'pointer' }} onClick={() => handleToggle('login')}>
+                                        <span style={{color: '#46F0F9', cursor: 'pointer'}}
+                                              onClick={() => handleToggle('login')}>
                                             Login
                                         </span>
                                     </Typography>
