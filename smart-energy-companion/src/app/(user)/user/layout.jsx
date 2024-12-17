@@ -9,9 +9,6 @@ import {useRouter} from "next/navigation";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import AdminUtils from "@/utils/AdminUtils";
 import LazyLoading from "@/components/LazyLoading/LazyLoading";
-import {doc, getDoc, setDoc, updateDoc, serverTimestamp} from "firebase/firestore";
-import {db} from "@/server/db/fireStore";
-import {toast} from "sonner";
 
 function UserLayout({children}) {
     const router = useRouter();

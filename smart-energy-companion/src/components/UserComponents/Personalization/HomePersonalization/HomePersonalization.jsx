@@ -1,40 +1,33 @@
 "use client";
 import React, {useState} from "react";
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Box,
-    Typography,
-    Paper,
-    Grid,
-    TextField,
     Button,
-    Stepper,
+    Divider,
+    IconButton,
+    MenuItem,
+    Paper,
     Step,
     StepLabel,
-    Divider,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    IconButton,
-    CircularProgress, MenuItem,
+    Stepper,
+    TextField,
+    Typography,
 } from "@mui/material";
-import {
-    Home,
-    Lightbulb,
-    Kitchen,
-    Tv,
-    AcUnit, CurrencyExchange, FlashOn, Star
-
-} from "@mui/icons-material";
+import Grid from "@mui/material/Grid2";
+import {CurrencyExchange, FlashOn, Home, Star} from "@mui/icons-material";
 import {motion} from "framer-motion";
 import {toast} from 'sonner';
-import {Controller, useForm, FormProvider} from "react-hook-form";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {Controller, FormProvider, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {homeValidator} from "@/validators/personlizedValidator";
 import {FormControl} from "@mui/material/";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const apartmentTypes = [
     "Apartment",
@@ -119,7 +112,7 @@ const appliancesList = [
 ];
 
 
-const HomePersonalization = () => {
+function HomePersonalization (userProfile)  {
     const steps = ["Home Details", "Room Setup", "Billing Information", "Summary"];
     const {control, handleSubmit, setValue, formState: {errors}, reset, getValues, watch} = useForm({
         mode: "onTouched",
@@ -127,6 +120,11 @@ const HomePersonalization = () => {
         reValidateMode: "onChange",
         defaultValues: {
             rooms: [], // Ensure rooms are initialized as an empty array
+            energyBill: {
+                amount: "",
+                startDate: "",
+                band: "",
+            },
         },
     });
     const [activeStep, setActiveStep] = useState(0);
@@ -135,7 +133,7 @@ const HomePersonalization = () => {
         address: "",
         type: "",
         rooms: [],
-        energyBill: {amount: 0, startDate: "", endDate: "", band: "", units: 0},
+        energyBill: {amount: 0, startDate: "", band: "", units: 0},
     });
 
     const handleNext = () => setActiveStep((prev) => prev + 1);
@@ -149,42 +147,50 @@ const HomePersonalization = () => {
     };
 
     const renderSummary = () => {
-        const { totalWattage } = calculateSummary();
+        const {totalWattage} = calculateSummary();
 
         const bandInfo = tariffBands.find(b => b.name === currentHome.energyBill.band);
         const units = bandInfo ? Math.floor(currentHome.energyBill.amount / bandInfo.costPerKWh) : 0;
 
         return (
-            <Paper sx={{ p: 3, borderRadius: 4, boxShadow: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>Summary</Typography>
+            <Paper sx={{p: 3, borderRadius: 4, boxShadow: 3}}>
+                <Typography variant="h6" sx={{fontWeight: 'bold', mb: 2}}>Summary</Typography>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            <Home sx={{ color: 'primary.main', mr: 1 }} />
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                            <Home sx={{color: 'primary.main', mr: 1}}/>
                             <Typography>Total Wattage:</Typography>
                         </Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'green' }}>{totalWattage} W</Typography>
+                        <Typography variant="subtitle1"
+                                    sx={{fontWeight: 'bold', color: 'green'}}>{totalWattage} W</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            <CurrencyExchange sx={{ color: 'primary.main', mr: 1 }} />
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                            <CurrencyExchange sx={{color: 'primary.main', mr: 1}}/>
                             <Typography>Planned Billing:</Typography>
                         </Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'blue' }}>₦{currentHome.energyBill.amount}</Typography>
+                        <Typography variant="subtitle1" sx={{
+                            fontWeight: 'bold',
+                            color: 'blue'
+                        }}>₦{currentHome.energyBill.amount}</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            <Star sx={{ color: 'primary.main', mr: 1 }} />
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                            <Star sx={{color: 'primary.main', mr: 1}}/>
                             <Typography>Selected Energy Band:</Typography>
                         </Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'orange' }}>{currentHome.energyBill.band}</Typography>
+                        <Typography variant="subtitle1" sx={{
+                            fontWeight: 'bold',
+                            color: 'orange'
+                        }}>{currentHome.energyBill.band}</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            <FlashOn sx={{ color: 'primary.main', mr: 1 }} />
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                            <FlashOn sx={{color: 'primary.main', mr: 1}}/>
                             <Typography>Estimated Units:</Typography>
                         </Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'purple' }}>{units} kWh</Typography>
+                        <Typography variant="subtitle1"
+                                    sx={{fontWeight: 'bold', color: 'purple'}}>{units} kWh</Typography>
                     </Grid>
                 </Grid>
             </Paper>
@@ -248,7 +254,7 @@ const HomePersonalization = () => {
     };
     const handleApartment = (event) => {
         event.preventDefault();
-        setValue('gender', event.target.value);
+        setValue('homeType', event.target.value);
     }
 
     // Disable "Next" Button If Invalid
@@ -260,27 +266,24 @@ const HomePersonalization = () => {
 
     // Updated Submit Function
     const submitData = (data) => {
-        console.log({
-            data
-        });
         const validationResult = homeValidator.safeParse(data);
         if (!validationResult.success) {
             toast.error("Please fix the errors in the form before submission.");
-            return;
-        }
-        console.log("Form Data:", data);
+            return null;
+       }
+        // save to db, and save to firstore
     };
 
     const calculateEnergyInsights = () => {
-        const { totalWattage } = calculateSummary();
+        const {totalWattage} = calculateSummary();
         const band = tariffBands.find(b => b.name === currentHome.energyBill.band);
 
-        if (!band) return { costPerDay: 0, estimatedUnits: 0 };
+        if (!band) return {costPerDay: 0, estimatedUnits: 0};
 
         const units = Math.floor(currentHome.energyBill.amount / band.costPerKWh);
         const costPerDay = (totalWattage / 1000) * band.costPerKWh;
 
-        return { units, costPerDay };
+        return {units, costPerDay};
     };
 
     const rooms = watch("rooms");
@@ -292,9 +295,22 @@ const HomePersonalization = () => {
         return null;
     };
 
+    // check for errors
+    Object.keys(errors).forEach((key) => {
+        if (errors[key]) {
+            console.log(errors[key].message);
+                toast.error("Form Error, Please fix the errors in the form before submission.");
+        }
+    });
+
+    const handleBandChange = (event) => {
+        event.preventDefault();
+        setValue('energyBill.band', event.target.value);
+    }
+
     return (
-        <FormProvider {...{ control, handleSubmit }}>
-            <Box sx={{ py: 6, px: 4 }} component="form" onSubmit={handleSubmit(submitData)} noValidate>
+        <FormProvider {...{control, handleSubmit}}>
+            <Box sx={{py: 6, px: 4}} component="form" onSubmit={handleSubmit(submitData)} noValidate>
                 <Typography
                     variant="h4"
                     sx={{
@@ -308,7 +324,7 @@ const HomePersonalization = () => {
                 >
                     Home Personalization
                 </Typography>
-                <Paper sx={{ p: 4, borderRadius: 4 }}>
+                <Paper sx={{p: 4, borderRadius: 4}}>
                     <Stepper activeStep={activeStep} alternativeLabel>
                         {steps.map((label, index) => (
                             <Step key={index}>
@@ -322,28 +338,44 @@ const HomePersonalization = () => {
                         <motion.div initial={{opacity: 0}} animate={{opacity: 1}} transition={{duration: 0.5}}>
                             <Typography variant="h5" sx={{mb: 3}}>Enter Home Details</Typography>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        label="Home Name"
-                                        fullWidth
-                                        value={currentHome.name}
-                                        onChange={(e) => setCurrentHome({...currentHome, name: e.target.value})}
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <Controller
+                                        name="homeName"
+                                        control={control}
+                                        defaultValue=""
+                                        render={({field}) => (
+                                            <TextField
+                                                {...field}
+                                                label="Home Name"
+                                                fullWidth
+                                                error={!!errors.homeName}
+                                                helperText={errors.homeName ? errors.homeName.message : ''}
+                                            />
+                                        )}
                                     />
                                     {renderError('name')}
                                 </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        label="Address"
-                                        fullWidth
-                                        value={currentHome.address}
-                                        onChange={(e) => setCurrentHome({...currentHome, address: e.target.value})}
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <Controller
+                                        name="address"
+                                        control={control}
+                                        defaultValue=""
+                                        render={({field}) => (
+                                            <TextField
+                                                {...field}
+                                                label="Address"
+                                                fullWidth
+                                                error={!!errors.address}
+                                                helperText={errors.address ? errors.address.message : ''}
+                                            />
+                                        )}
                                     />
                                     {renderError('address')}
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }}>
                                     <FormControl fullWidth>
                                         <Controller
-                                            name="apartmentType"
+                                            name="homeType"
                                             control={control}
                                             render={({field}) => (
                                                 <TextField
@@ -386,7 +418,7 @@ const HomePersonalization = () => {
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Grid container spacing={2}>
-                                            <Grid item xs={12} md={6}>
+                                            <Grid size={{ xs: 12, md: 6 }}>
                                                 <Controller
                                                     name={`rooms.${roomIndex}.name`}
                                                     control={control}
@@ -395,7 +427,7 @@ const HomePersonalization = () => {
                                                     )}
                                                 />
                                             </Grid>
-                                            <Grid item xs={12} md={6}>
+                                            <Grid size={{ xs: 12, md: 6 }}>
                                                 <Controller
                                                     name={`rooms.${roomIndex}.type`}
                                                     control={control}
@@ -412,7 +444,7 @@ const HomePersonalization = () => {
                                             </Grid>
                                             {room.appliances.map((appliance, applianceIndex) => (
                                                 <Grid container spacing={2} sx={{mt: 2}} key={applianceIndex}>
-                                                    <Grid item xs={12} md={6}>
+                                                    <Grid size={{ xs: 12, md: 6 }}>
                                                         <TextField
                                                             select
                                                             value={appliance.name}
@@ -461,7 +493,7 @@ const HomePersonalization = () => {
                                                             </>
                                                         )}
                                                     </Grid>
-                                                    <Grid item xs={12} md={4}>
+                                                    <Grid size={{ xs: 12, md: 3 }}>
                                                         <TextField
                                                             type="number"
                                                             value={appliance.wattage}
@@ -477,7 +509,7 @@ const HomePersonalization = () => {
                                                             fullWidth
                                                         />
                                                     </Grid>
-                                                    <Grid item xs={12} md={2}>
+                                                    <Grid size={{ xs: 12, md: 3 }}>
                                                         <TextField
                                                             type="number"
                                                             value={appliance.qty || 1}
@@ -494,9 +526,7 @@ const HomePersonalization = () => {
                                                         />
                                                     </Grid>
                                                     <Grid
-                                                        item
-                                                        xs={12}
-                                                        md={2}
+                                                    size={{ xs: 12, md: 2 }}
                                                         sx={{display: "flex", alignItems: "center"}}
                                                     >
                                                         <IconButton
@@ -544,75 +574,115 @@ const HomePersonalization = () => {
 
                     {activeStep === 2 && (
                         <motion.div
-                            initial={{opacity: 0}}
-                            animate={{opacity: 1}}
-                            transition={{duration: 0.5}}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.5 }}
                         >
-                            <Typography variant="h5" sx={{mb: 3}}>
+                            <Typography variant="h5" sx={{ mb: 3 }}>
                                 Energy Billing Information
                             </Typography>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        label="Monthly Energy Bill (in ₦)"
-                                        fullWidth
-                                        value={currentHome.energyBill.amount}
-                                        onChange={(e) =>
-                                            setCurrentHome({
-                                                ...currentHome,
-                                                energyBill: {
-                                                    ...currentHome.energyBill,
-                                                    amount: e.target.value,
-                                                },
-                                            })
-                                        }
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <Controller
+                                        name="energyBill.amount"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Monthly Energy Bill (in ₦)"
+                                                fullWidth
+                                                value={field.value || ''}
+                                                onChange={(e) => {
+                                                    field.onChange(e.target.value);
+                                                    setValue("energyBill.amount", e.target.value);
+                                                    setCurrentHome((prev) => ({
+                                                        ...prev,
+                                                        energyBill: {
+                                                            ...prev.energyBill,
+                                                            amount: e.target.value,
+                                                        },
+                                                    }));
+                                                }}
+                                                error={!!errors.energyBill?.amount}
+                                                helperText={errors.energyBill?.amount?.message || ""}
+                                            />
+                                        )}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        label="Start Date"
-                                        type="date"
-                                        fullWidth
-                                        slotProps={{inputLabel: {shrink: true}}}
-                                        value={currentHome.energyBill.startDate}
-                                        onChange={(e) =>
-                                            setCurrentHome({
-                                                ...currentHome,
-                                                energyBill: {
-                                                    ...currentHome.energyBill,
-                                                    startDate: e.target.value,
-                                                },
-                                            })
-                                        }
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <Controller
+                                        name="energyBill.startDate"
+                                        control={control}
+                                        defaultValue={currentHome.energyBill.startDate || ""}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                label="Start Date"
+                                                type="date"
+                                                fullWidth
+                                                value={field.value || ''}
+                                                slotProps={{
+                                                    inputLabel: {
+                                                        shrink: true,
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    field.onChange(e.target.value);
+                                                    setValue("energyBill.startDate", e.target.value);
+                                                    setCurrentHome((prev) => ({
+                                                        ...prev,
+                                                        energyBill: {
+                                                            ...prev.energyBill,
+                                                            startDate: e.target.value,
+                                                        },
+                                                    }));
+                                                }}
+                                                error={!!errors.energyBill?.startDate}
+                                                helperText={errors.energyBill?.startDate?.message || ""}
+                                            />
+                                        )}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        label="Select Energy Band"
-                                        select
-                                        fullWidth
-                                        value={currentHome.energyBill.band || ""}
-                                        onChange={(e) =>
-                                            setCurrentHome({
-                                                ...currentHome,
-                                                energyBill: {
-                                                    ...currentHome.energyBill,
-                                                    band: e.target.value,
-                                                },
-                                            })
-                                        }
-                                    >
-                                        {tariffBands.map((band) => (
-                                            <MenuItem key={band.name} value={band.name}>
-                                                {band.name} ({band.costPerKWh} ₦/kWh)
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                    <Controller
+                                        name="energyBill.band"
+                                        control={control}
+                                        defaultValue={currentHome.energyBill.band || ""}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                select
+                                                label="Select Energy Band"
+                                                value={field.value || ''}
+                                                fullWidth
+                                                onChange={(e) => {
+                                                    field.onChange(e.target.value);
+                                                    setValue("energyBill.band", e.target.value);
+                                                    setCurrentHome((prev) => ({
+                                                        ...prev,
+                                                        energyBill: {
+                                                            ...prev.energyBill,
+                                                            band: e.target.value,
+                                                        },
+                                                    }));
+                                                }}
+                                                error={!!errors.energyBill?.band}
+                                                helperText={errors.energyBill?.band?.message || ""}
+                                            >
+                                                {tariffBands.map((band) => (
+                                                    <MenuItem key={band.name} value={band.name}>
+                                                        {band.name} ({band.costPerKWh} ₦/kWh)
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        )}
+                                    />
                                 </Grid>
                             </Grid>
-
                         </motion.div>
                     )}
+
+
 
                     {activeStep === 3 && renderSummary()}
 

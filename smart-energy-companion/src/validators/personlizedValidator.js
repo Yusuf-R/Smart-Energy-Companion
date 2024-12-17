@@ -1,9 +1,17 @@
 import { z } from "zod";
 
+const tariffBands = [
+    { name: "Band A", costPerKWh: 225 },
+    { name: "Band B", costPerKWh: 63 },
+    { name: "Band C", costPerKWh: 50 },
+    { name: "Band D", costPerKWh: 43 },
+    { name: "Band E", costPerKWh: 40 },
+];
+
 export const homeValidator = z.object({
-    name: z.string().nonempty("Home Name is required"),
+    homeName: z.string().nonempty("Home Name is required"),
     address: z.string().nonempty("Address is required"),
-    type: z.string().nonempty("Apartment Type is required"),
+    homeType: z.string().nonempty("Apartment Type is required"),
     rooms: z
         .array(
             z.object({
@@ -24,9 +32,6 @@ export const homeValidator = z.object({
     energyBill: z.object({
         amount: z.string().regex(/^\d+$/, "Energy bill must be a valid number"),
         startDate: z.string().nonempty("Start Date is required"),
-        endDate: z.string().nonempty("End Date is required"),
-        band: z.enum(["A", "B", "C", "D", "E"], {
-            errorMap: () => ({ message: "Please select a valid energy band" }),
-        }),
+        band: z.string().nonempty("Band Name is required"),
     }),
 });
