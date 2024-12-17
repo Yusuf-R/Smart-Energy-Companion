@@ -1,9 +1,12 @@
-function BusinessPersonalization () {
+import BusinessPersonalization
+    from "@/components/UserComponents/Personalization/BusinessPersonalization/BusinessPersonalization";
+
+function BusinessPersonalied () {
     return (
         <>
-            <Business/>
+            <BusinessPersonalization/>
         </>
     )
 }
 
-export default BusinessPersonalization;
+export default BusinessPersonalied;
